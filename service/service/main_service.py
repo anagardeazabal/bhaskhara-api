@@ -4,66 +4,57 @@ from loguru import logger
 from service.constants import mensagens
 import pandas as pd
 import numpy as np
+import math
 
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+class Bhaskara():
 
+    def _init_(self):
+        logger.debug(mensagens.INICIO_LOAD_SERVICO)
+        self.load_servico()
 
-class SentimentosService():
+    def load_servico(self):
 
-    def __init__(self):
-        logger.debug(mensagens.INICIO_LOAD_MODEL)
-        self.load_model()
+        logger.debug(mensagens.FIM_LOAD_SERVICO)
 
-    def load_model(self):
-        """"
-        Carrega o modelo VADER a ser usado
-        """
-
-        self.model = SentimentIntensityAnalyzer()
-
-        logger.debug(mensagens.FIM_LOAD_MODEL)
 
     def executar_rest(self, texts):
         response = {}
 
-        logger.debug(mensagens.INICIO_PREDICT)
-        start_time = time.time()
+        logger.debug(mensagens.INICIO_SERVICO)
 
-        response_predicts = self.buscar_predicao(texts['textoMensagem'])
+        response = self.bhaskara(texts)
 
-        logger.debug(mensagens.FIM_PREDICT)
-        logger.debug(f"Fim de todas as predições em {time.time()-start_time}")
-
-        df_response = pd.DataFrame(texts, columns=['textoMensagem'])
-        df_response['predict'] = response_predicts
-
-        df_response = df_response.drop(columns=['textoMensagem'])
-
-        response = {
-                     "listaClassificacoes": json.loads(df_response.to_json(
-                                                                            orient='records', force_ascii=False))}
+        logger.debug(response)
 
         return response
 
-    def buscar_predicao(self, texts):
-        """
-        Pega o modelo carregado e aplica em texts
-        """
-        logger.debug('Iniciando o predict...')
 
-        response = []
+    def bhaskara(self, texts):
 
-        for text in texts:
-            sentiment_dict = self.model.polarity_scores(text)
-        
-            # decide sentiment as positive, negative and neutral
-            if sentiment_dict['compound'] >= 0.05:
-                response.append("Positive")
-        
-            elif sentiment_dict['compound'] <= - 0.05:
-                response.append("Negative")
-        
-            else:
-                response.append("Neutral")
+        a = texts["a"][0]
+        logger.debug(a)
 
-        return response
+        b = texts["b"][0]
+        logger.debug(b)
+        
+        c = texts["c"][0]
+        logger.debug(type(c))
+
+        delta=b**2-4*a*c
+
+        logger.debug(delta)
+
+        if (delta < 0):
+            resposta = "Não existe raízes possiveis."
+            return resposta
+        elif (delta == 0):
+            response = (-b+math.sqrt(delta))/2*a
+            response = str(response)     
+            return response
+        else:
+            x1=-b+math.sqrt(delta)/2*a
+            x2=-b-math.sqrt(delta)/2*a   
+            
+            resposta = "Valor de X1: " + str(round(x1, 2)) + ", e o valor de X2: " + str (round(x2, 2))
+
+        return resposta
